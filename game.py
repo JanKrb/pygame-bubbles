@@ -113,7 +113,7 @@ class Bubble(pygame.sprite.Sprite):
     def update(self):
         if self.killed:
             self.kill()
-            return
+            return            
 
 class Game:
     def __init__(self) -> None:
@@ -174,12 +174,13 @@ class Game:
 
         self.bubble_speed -= 1
 
-        any_bubble_hovered = False
-        for bubble in self.bubbles.sprites():
-            if self.bubble_speed <= 0 and not bubble.killed:
-                self.bubble_speed = Settings.bubble_speed
+        if self.bubble_speed <= 0:
+            self.bubble_speed = Settings.bubble_speed
+            for bubble in self.bubbles.sprites():
                 bubble.increase_size()
 
+        any_bubble_hovered = False
+        for bubble in self.bubbles.sprites():
             if bubble.is_hovered(pygame.mouse.get_pos()):
                 any_bubble_hovered = True
 
