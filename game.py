@@ -136,10 +136,33 @@ class Bubble(pygame.sprite.Sprite):
     def draw(self, screen):
         screen.blit(self.image, self.rect)
     
+    def check_bubble_collision(self):
+        pass
+
+    def check_window_collision(self):
+        # TODO: Game Over
+        left_pos = self.rect.center[0] - self.rect.width // 2
+        if left_pos < 0: self.kill(looped_call=False)
+
+        right_pos = self.rect.center[0] + self.rect.width // 2
+        if right_pos > Settings.window_width: self.kill(looped_call=False)
+
+        top_pos = self.rect.center[1] - self.rect.height // 2
+        if top_pos < 0: self.kill(looped_call=False)
+
+        bottom_pos = self.rect.center[1] + self.rect.height // 2
+        if bottom_pos > Settings.window_height: self.kill(looped_call=False)
+
+    def check_collision(self):
+        self.check_bubble_collision()
+        self.check_window_collision()
+    
     def update(self):
         if self.killed:
             self.kill()
-            return            
+            return  
+
+        self.check_collision()          
 
 class Game:
     def __init__(self) -> None:
