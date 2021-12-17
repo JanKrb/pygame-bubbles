@@ -1,3 +1,5 @@
+from math import sqrt
+from typing import Tuple
 import pygame
 import os
 import random
@@ -31,7 +33,7 @@ class Settings:
     bubble_radius = 5
     bubble_speed = 20
     bubble_spawn_margin = 10
-    bubble_spawn_speed = (1, 4)
+    bubble_spawn_speed_initial = (1, 4)
     bubble_animation_speed = 1
     bubbles_max_initial = 5
 
@@ -57,21 +59,45 @@ class Bubble(pygame.sprite.Sprite):
         self.killed = False
 
         self.image = self.images[self.state]
-        self.image = pygame.transform.scale(self.images[self.state], (Settings.bubble_radius, Settings.bubble_radius))
+        self.image = pygame.transform.scale(self.images[self.state], (Settings.bubble_radius * 2, Settings.bubble_radius * 2))
         self.rect = self.image.get_rect()
 
-        self.expansion_rate = random.randint(*Settings.bubble_spawn_speed)
+        self.expansion_rate = random.randint(*game.bubble_spawn_speed)
 
-        self.rect.center = (
-            random.randint(Settings.bubble_radius + Settings.bubble_spawn_margin, Settings.window_width - (Settings.bubble_radius + Settings.bubble_spawn_margin)),
-            random.randint(Settings.bubble_radius + Settings.bubble_spawn_margin, Settings.window_height - (Settings.bubble_radius + Settings.bubble_spawn_margin))
-        )
+        self.rect.center = Bubble.generate_next_free_position()
 
     @staticmethod
     def get_bubble_images() -> list[pygame.Surface]:
         bubble_images = ['bubble1.png', 'bubble2.png', 'bubble3.png', 'bubble4.png', 'bubble5.png', 'bubble6.png', 'bubble7.png']
         bubble_images.sort()
         return [pygame.image.load(Settings.create_image_path(img)) for img in bubble_images]
+    
+    @staticmethod
+    def generate_next_free_position(depth=0) -> tuple[int, int]:
+        random_pos = (
+            random.randint(0, Settings.window_width - Settings.bubble_radius - 10),
+            random.randint(0, Settings.window_height - Settings.bubble_radius - 10)
+        )
+
+        if not Bubble._check_if_pos_is_valid(random_pos) and depth <= 50:
+            return Bubble.generate_next_free_position(depth=depth + 1)
+        
+        return random_pos
+    
+    @staticmethod 
+    def _check_if_pos_is_valid(position):
+        bubbles = [(bubble.rect.center, bubble.rect.width) for bubble in game.bubbles.sprites()]
+
+        for b in bubbles:
+            b_pos = b[0]
+            dist_x = abs(b_pos[0] - position[0])
+            dist_y = abs(b_pos[1] - position[1])
+            dist = sqrt(dist_x ** 2 + dist_y ** 2)
+
+            if dist <= b[1] // 2 + 10:
+                return False
+
+        return True
     
     def kill(self, looped_call=True) -> None:
         self.killed = True
@@ -132,6 +158,7 @@ class Game:
         self.bubbles = pygame.sprite.Group()
         self.bubble_animation_frames = 0
         self.bubbles_limit = Settings.bubbles_max_initial
+        self.bubble_spawn_speed = Settings.bubble_spawn_speed_initial
 
         pygame.mixer.music.set_volume(Settings.volume) 
         self.sound_pop_bubble = pygame.mixer.Sound(Settings.create_sound_path('pop.mp3'))
