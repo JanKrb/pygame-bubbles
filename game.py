@@ -33,6 +33,7 @@ class Settings:
     bubble_spawn_margin = 10
     bubble_spawn_speed = (1, 4)
     bubble_animation_speed = 1
+    bubbles_max_initial = 5
 
     # Sound settings
     volume = 0.1
@@ -130,8 +131,7 @@ class Game:
         self.background = Background()
         self.bubbles = pygame.sprite.Group()
         self.bubble_animation_frames = 0
-
-        [self.bubbles.add(Bubble()) for _ in range(10)]
+        self.bubbles_limit = Settings.bubbles_max_initial
 
         pygame.mixer.music.set_volume(Settings.volume) 
         self.sound_pop_bubble = pygame.mixer.Sound(Settings.create_sound_path('pop.mp3'))
@@ -164,7 +164,8 @@ class Game:
                 self.handle_mouse_events(event)
 
     def respawn_bubbles(self) -> None:
-        pass
+        if len(self.bubbles.sprites()) <= self.bubbles_limit:
+            self.bubbles.add(Bubble())
 
     def update(self) -> None:
         self.respawn_bubbles()
