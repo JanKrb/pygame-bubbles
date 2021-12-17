@@ -1,5 +1,6 @@
 import pygame
 import os
+import random
 
 class Settings:
     # Window settings
@@ -28,9 +29,10 @@ class Settings:
     
     # Bubble settings
     bubble_radius = 5
-    bubble_speed = 1000 / 60 # 60x per second
+    bubble_speed = 20
     bubble_spawn_margin = 10
     bubble_spawn_speed = (1, 4)
+    bubble_animation_speed = 1
 
 class Background(pygame.sprite.Sprite):
     def __init__(self, image_name='background.jpg') -> None:
@@ -48,42 +50,70 @@ class Bubble(pygame.sprite.Sprite):
 
         self.images = Bubble.get_bubble_images()
         self.state = 0 # Current image
+        self.killed = False
 
         self.image = self.images[self.state]
         self.image = pygame.transform.scale(self.images[self.state], (Settings.bubble_radius, Settings.bubble_radius))
         self.rect = self.image.get_rect()
 
+        self.expansion_rate = random.randint(*Settings.bubble_spawn_speed)
+
+        self.rect.center = (
+            random.randint(Settings.bubble_radius + Settings.bubble_spawn_margin, Settings.window_width - (Settings.bubble_radius + Settings.bubble_spawn_margin)),
+            random.randint(Settings.bubble_radius + Settings.bubble_spawn_margin, Settings.window_height - (Settings.bubble_radius + Settings.bubble_spawn_margin))
+        )
+
     @staticmethod
     def get_bubble_images() -> list[pygame.Surface]:
-        images_in_path = os.listdir(Settings.path_images)
-        bubble_images = [img for img in images_in_path if img.startswith('bubble')]
+        bubble_images = ['bubble1.png', 'bubble2.png', 'bubble3.png', 'bubble4.png', 'bubble5.png', 'bubble6.png', 'bubble7.png']
+        bubble_images.sort()
         return [pygame.image.load(Settings.create_image_path(img)) for img in bubble_images]
     
     def kill(self) -> None:
-        self.state += 1
-        self.image = self.images[self.state]
-        self.rect = self.image.get_rect()
+        self.killed = True
 
-        if self.state > len(self.images) - 1:
+        if game.bubble_animation_frames <= Settings.bubble_animation_speed:
+            game.bubble_animation_frames += 1
+            return
+        else:
+            game.bubble_animation_frames = 0
+
+        self.state += 1
+        old_center = self.rect.center
+        old_size = self.rect.size
+
+        self.image = self.images[self.state]
+        self.image = pygame.transform.scale(self.image, old_size)
+        self.rect = self.image.get_rect()
+        self.rect.center = old_center
+
+
+        if self.state > len(self.images) - 2:
             super().kill() # Kill after animation is done
 
     def increase_size(self) -> None:
         center = self.rect.center
-        self.image = pygame.transform.scale(self.images[self.state], (self.rect.width + Settings.bubble_speed, self.rect.height + Settings.bubble_speed))
+        self.image = pygame.transform.scale(self.images[self.state], (self.rect.width + self.expansion_rate, self.rect.height + self.expansion_rate))
         self.rect = self.image.get_rect()
         self.rect.center = center
+
+    def is_hovered(self, mouse_pos) -> bool:
+        return self.rect.collidepoint(mouse_pos)
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
     
     def update(self):
-        pass
+        if self.killed:
+            self.kill()
+            return
 
 class Game:
     def __init__(self) -> None:
         os.environ['SDL_VIDEO_WINDOW_CENTERED'] = '1'
         pygame.init()
         pygame.display.set_caption(Settings.window_caption)
+        pygame.mouse.set_cursor(*pygame.cursors.diamond)
 
         self.screen = pygame.display.set_mode(Settings.get_size())
         self.clock = pygame.time.Clock()
@@ -93,8 +123,9 @@ class Game:
 
         self.background = Background()
         self.bubbles = pygame.sprite.Group()
+        self.bubble_animation_frames = 0
 
-        self.bubbles.add(Bubble())
+        [self.bubbles.add(Bubble()) for _ in range(10)]
 
     def run(self) -> None:
         while self.running:
@@ -103,13 +134,25 @@ class Game:
             self.update()
             self.draw()
 
+    def handle_keydown_events(self, event) -> None:
+        if event.key == pygame.K_ESCAPE:
+            self.running = False
+
+    def handle_mouse_events(self, event) -> None:
+        if event.button == 1:
+            for bubble in self.bubbles:
+                if bubble.is_hovered(event.pos):
+                    bubble.kill()
+                    break
+
     def handle_events(self) -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    self.running = False
+                self.handle_keydown_events(event)    
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                self.handle_mouse_events(event)
 
     def respawn_bubbles(self) -> None:
         pass
@@ -121,12 +164,16 @@ class Game:
 
         self.bubble_speed -= 1
 
-        # Increase bubble size
-        if self.bubble_speed <= 0:
-            self.bubble_speed = Settings.bubble_speed
-
-            for bubble in self.bubbles.sprites():
+        any_bubble_hovered = False
+        for bubble in self.bubbles.sprites():
+            if self.bubble_speed <= 0 and not bubble.killed:
+                self.bubble_speed = Settings.bubble_speed
                 bubble.increase_size()
+
+            if bubble.is_hovered(pygame.mouse.get_pos()):
+                any_bubble_hovered = True
+
+            pygame.mouse.set_cursor(*pygame.cursors.broken_x if any_bubble_hovered else pygame.cursors.diamond)
 
     def draw(self) -> None:
         self.screen.fill((0, 0, 0))
