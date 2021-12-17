@@ -34,6 +34,9 @@ class Settings:
     bubble_spawn_speed = (1, 4)
     bubble_animation_speed = 1
 
+    # Sound settings
+    volume = 0.1
+
 class Background(pygame.sprite.Sprite):
     def __init__(self, image_name='background.jpg') -> None:
         super().__init__()
@@ -69,8 +72,11 @@ class Bubble(pygame.sprite.Sprite):
         bubble_images.sort()
         return [pygame.image.load(Settings.create_image_path(img)) for img in bubble_images]
     
-    def kill(self) -> None:
+    def kill(self, looped_call=True) -> None:
         self.killed = True
+
+        if not looped_call:
+            pygame.mixer.Sound.play(game.sound_pop_bubble)
 
         if game.bubble_animation_frames <= Settings.bubble_animation_speed:
             game.bubble_animation_frames += 1
@@ -127,6 +133,9 @@ class Game:
 
         [self.bubbles.add(Bubble()) for _ in range(10)]
 
+        pygame.mixer.music.set_volume(Settings.volume) 
+        self.sound_pop_bubble = pygame.mixer.Sound(Settings.create_sound_path('pop.mp3'))
+
     def run(self) -> None:
         while self.running:
             self.clock.tick(Settings.window_fps)
@@ -142,7 +151,7 @@ class Game:
         if event.button == 1:
             for bubble in self.bubbles:
                 if bubble.is_hovered(event.pos):
-                    bubble.kill()
+                    bubble.kill(looped_call=False)
                     break
 
     def handle_events(self) -> None:
