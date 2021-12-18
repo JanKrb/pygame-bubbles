@@ -190,7 +190,10 @@ class Game:
         self.bubbles_limit = Settings.bubbles_max_initial
         self.bubble_spawn_speed = Settings.bubble_spawn_speed_initial
 
+        self.game_over = False
+        self.pause = False
         self.points = 0
+
         pygame.mixer.music.set_volume(Settings.volume) 
         self.sound_pop_bubble = pygame.mixer.Sound(Settings.create_sound_path('pop.mp3'))
 
@@ -198,8 +201,14 @@ class Game:
         while self.running:
             self.clock.tick(Settings.window_fps)
             self.handle_events()
-            self.update()
-            self.draw()
+
+            if not self.pause and not self.game_over:
+                self.update()
+                self.draw()
+            elif self.pause:
+                self.draw_pause()
+            elif self.game_over:
+                self.draw_game_over()
 
     def handle_keydown_events(self, event) -> None:
         if event.key == pygame.K_ESCAPE:
@@ -254,8 +263,15 @@ class Game:
         self.draw_points()
 
         pygame.display.flip()
+    
+    def draw_pause(self) -> None:
+        self.screen.fill((0, 0, 0))
         pygame.display.flip()
-
+    
+    def draw_gameover(self) -> None:
+        self.screen.fill((0, 0, 0))
+        pygame.display.flip()
+    
     def draw_points(self) -> None:
         font = pygame.font.SysFont(Settings.font_points[0], Settings.font_points[1])
         points_text = font.render(Settings.title_points.replace('%s', str(self.points)), True, (255, 255, 255))
