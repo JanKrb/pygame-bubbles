@@ -40,6 +40,13 @@ class Settings:
     # Sound settings
     volume = 0.1
 
+    # Fonts
+    font_pause = ('arialblack', 64)
+    font_points = ('arialblack', 28)
+
+    # Strings
+    title_points = "Points: %s"
+
 class Background(pygame.sprite.Sprite):
     def __init__(self, image_name='background.jpg') -> None:
         super().__init__()
@@ -183,6 +190,7 @@ class Game:
         self.bubbles_limit = Settings.bubbles_max_initial
         self.bubble_spawn_speed = Settings.bubble_spawn_speed_initial
 
+        self.points = 0
         pygame.mixer.music.set_volume(Settings.volume) 
         self.sound_pop_bubble = pygame.mixer.Sound(Settings.create_sound_path('pop.mp3'))
 
@@ -202,6 +210,7 @@ class Game:
             for bubble in self.bubbles:
                 if bubble.is_hovered(event.pos):
                     bubble.kill(looped_call=False)
+                    self.points += 1
                     break
 
     def handle_events(self) -> None:
@@ -242,7 +251,19 @@ class Game:
         self.background.draw(self.screen)
         self.bubbles.draw(self.screen)
 
+        self.draw_points()
+
         pygame.display.flip()
+        pygame.display.flip()
+
+    def draw_points(self) -> None:
+        font = pygame.font.SysFont(Settings.font_points[0], Settings.font_points[1])
+        points_text = font.render(Settings.title_points.replace('%s', str(self.points)), True, (255, 255, 255))
+        points_text_rect = points_text.get_rect()
+        points_text_rect.top = Settings.window_height - 50
+        points_text_rect.left = 25
+
+        self.screen.blit(points_text, points_text_rect)
 
 if __name__ == '__main__':
     game = Game()
