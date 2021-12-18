@@ -210,7 +210,7 @@ class Game:
             for bubble in self.bubbles:
                 if bubble.is_hovered(event.pos):
                     bubble.kill(looped_call=False)
-                    self.points += 1
+                    self.points += bubble.rect.width // 2 # Points depending on bubble size
                     break
 
     def handle_events(self) -> None:
