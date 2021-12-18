@@ -1,9 +1,15 @@
-from math import sqrt
-from typing import Tuple
-import pygame
+# https://pylint.pycqa.org/en/latest/technical_reference/features.html
+# pylint: disable=E1101
+# pylint: disable=C0115
+# pylint: disable=C0114
+# pylint: disable=R0902
+# pylint: disable=R0902
+# pylint: disable=W0511
+
 import os
 import random
-
+from math import sqrt
+import pygame
 
 class Settings:
     # Window settings
@@ -14,6 +20,9 @@ class Settings:
 
     @staticmethod
     def get_size() -> tuple[int, int]:
+        """
+        Returns the window size as a tuple
+        """
         return Settings.window_width, Settings.window_height
 
     # Paths
@@ -24,10 +33,16 @@ class Settings:
 
     @staticmethod
     def create_image_path(image_name) -> str:
+        """
+        Generate absolute path to image
+        """
         return os.path.join(Settings.path_images, image_name)
 
     @staticmethod
     def create_sound_path(sound_name) -> str:
+        """
+        Generate absolute path to sound
+        """
         return os.path.join(Settings.path_sounds, sound_name)
 
     # Bubble settings
@@ -57,8 +72,15 @@ class Background(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, Settings.get_size())
 
     def draw(self, screen):
+        """
+        Draw sprite on screen at position 0/0
+        """
         screen.blit(self.image, (0, 0))
 
+    def update(self):
+        """
+        Update sprite every [fps] frames
+        """
 
 class Bubble(pygame.sprite.Sprite):
     def __init__(self) -> None:
@@ -80,6 +102,10 @@ class Bubble(pygame.sprite.Sprite):
 
     @staticmethod
     def get_bubble_images() -> list[pygame.Surface]:
+        """
+        Get all images used in the animation
+        """
+
         bubble_images = sorted(['bubble1.png',
                                 'bubble2.png',
                                 'bubble3.png',
@@ -92,6 +118,10 @@ class Bubble(pygame.sprite.Sprite):
 
     @staticmethod
     def generate_next_free_position(depth=0) -> tuple[int, int]:
+        """
+        Generate random position on the screen and check if valid
+        """
+
         random_pos = (
             random.randint(
                 0,
@@ -111,21 +141,30 @@ class Bubble(pygame.sprite.Sprite):
 
     @staticmethod
     def _check_if_pos_is_valid(position):
+        """
+        Check if chosen position is far enough away from another bubble
+        """
+
         bubbles = [(bubble.rect.center, bubble.rect.width)
                    for bubble in game.bubbles.sprites()]
 
-        for b in bubbles:
-            b_pos = b[0]
-            dist_x = abs(b_pos[0] - position[0])
-            dist_y = abs(b_pos[1] - position[1])
+        for bubble in bubbles:
+            bubble_pos = bubble[0]
+            dist_x = abs(bubble_pos[0] - position[0])
+            dist_y = abs(bubble_pos[1] - position[1])
             dist = sqrt(dist_x ** 2 + dist_y ** 2)
 
-            if dist <= b[1] // 2 + 10:
+            if dist <= bubble[1] // 2 + 10:
                 return False
 
         return True
 
     def kill(self, looped_call=True) -> None:
+        """
+        Overload the kill method, to play the animation first.
+        Initiate the animation if looped_call=False
+        """
+
         self.killed = True
 
         if not looped_call:
@@ -134,8 +173,8 @@ class Bubble(pygame.sprite.Sprite):
         if game.bubble_animation_frames <= Settings.bubble_animation_speed:
             game.bubble_animation_frames += 1
             return
-        else:
-            game.bubble_animation_frames = 0
+
+        game.bubble_animation_frames = 0
 
         self.state += 1
         old_center = self.rect.center
@@ -150,6 +189,10 @@ class Bubble(pygame.sprite.Sprite):
             super().kill()  # Kill after animation is done
 
     def increase_size(self) -> None:
+        """
+        Increase the size of the bubble by it's expansion rate
+        """
+
         center = self.rect.center
         self.image = pygame.transform.scale(self.images[self.state], (
             self.rect.width + self.expansion_rate, self.rect.height + self.expansion_rate))
@@ -158,13 +201,25 @@ class Bubble(pygame.sprite.Sprite):
         self.radius = self.rect.width // 2
 
     def is_hovered(self, mouse_pos) -> bool:
+        """
+        Check if bubble is hovered by cursor
+        """
+
         return self.rect.collidepoint(mouse_pos)
 
     def draw(self, screen):
+        """
+        Draw sprite on screen
+        """
+
         screen.blit(self.image, self.rect)
 
     def check_bubble_collision(self):
-        # TODO: Game Over
+        """
+        Check if sprite collides with another sprite/bubble
+        TODO: Implement game over
+        """
+
         hits = pygame.sprite.spritecollide(
             self, game.bubbles, False, pygame.sprite.collide_circle)
 
@@ -173,7 +228,11 @@ class Bubble(pygame.sprite.Sprite):
                 hit.kill(looped_call=False)
 
     def check_window_collision(self):
-        # TODO: Game Over
+        """
+        Check if sprite collides with edge
+        TODO: Implement game over
+        """
+
         left_pos = self.rect.center[0] - self.rect.width // 2
         if left_pos < 0:
             self.kill(looped_call=False)
@@ -191,10 +250,18 @@ class Bubble(pygame.sprite.Sprite):
             self.kill(looped_call=False)
 
     def check_collision(self):
+        """
+        Central collision check, splitting into edge & sprite collision
+        """
+
         self.check_bubble_collision()
         self.check_window_collision()
 
     def update(self):
+        """
+        Update sprite every [fps] frames
+        """
+
         if self.killed:
             self.kill()
             return
@@ -230,6 +297,10 @@ class Game:
             Settings.create_sound_path('pop.mp3'))
 
     def run(self) -> None:
+        """
+        Main loop
+        """
+
         while self.running:
             self.clock.tick(Settings.window_fps)
             self.handle_events()
@@ -243,10 +314,18 @@ class Game:
                 self.draw_game_over()
 
     def handle_keydown_events(self, event) -> None:
+        """
+        Event handler for keydown events (key pressed)
+        """
+
         if event.key == pygame.K_ESCAPE:
             self.running = False
 
     def handle_mouse_events(self, event) -> None:
+        """
+        Event handler for mouse events
+        """
+
         if event.button == 1:
             for bubble in self.bubbles:
                 if bubble.is_hovered(event.pos):
@@ -255,6 +334,10 @@ class Game:
                     break
 
     def handle_events(self) -> None:
+        """
+        Central event listener, splitting into keyboard and mouse handler
+        """
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -264,10 +347,19 @@ class Game:
                 self.handle_mouse_events(event)
 
     def respawn_bubbles(self) -> None:
+        """
+        Respawning bubbles
+        TODO: Add delay
+        """
+
         if len(self.bubbles.sprites()) <= self.bubbles_limit:
             self.bubbles.add(Bubble())
 
     def update(self) -> None:
+        """
+        Update loop every [fps] frames
+        """
+
         self.respawn_bubbles()
 
         self.bubbles.update()
@@ -288,6 +380,10 @@ class Game:
                 *pygame.cursors.broken_x if any_bubble_hovered else pygame.cursors.diamond)
 
     def draw(self) -> None:
+        """
+        Draw all game objects if not pause or gameover
+        """
+
         self.screen.fill((0, 0, 0))
 
         self.background.draw(self.screen)
@@ -298,14 +394,26 @@ class Game:
         pygame.display.flip()
 
     def draw_pause(self) -> None:
+        """
+        Draw the pause screen
+        """
+
         self.screen.fill((0, 0, 0))
         pygame.display.flip()
 
     def draw_gameover(self) -> None:
+        """
+        Draw the game over screen
+        """
+
         self.screen.fill((0, 0, 0))
         pygame.display.flip()
 
     def draw_points(self) -> None:
+        """
+        Draw a point counter onto the screen
+        """
+
         font = pygame.font.SysFont(
             Settings.font_points[0],
             Settings.font_points[1])
