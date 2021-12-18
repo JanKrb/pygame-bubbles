@@ -5,6 +5,7 @@
 # pylint: disable=R0902
 # pylint: disable=R0902
 # pylint: disable=W0511
+# pylint: disable=E1136
 
 import os
 import random
