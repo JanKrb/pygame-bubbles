@@ -48,6 +48,7 @@ class Settings:
     # Strings
     title_points = "Points: %s"
 
+
 class Background(pygame.sprite.Sprite):
     def __init__(self, image_name='background.jpg') -> None:
         super().__init__()
@@ -58,6 +59,7 @@ class Background(pygame.sprite.Sprite):
     def draw(self, screen):
         screen.blit(self.image, (0, 0))
 
+
 class Bubble(pygame.sprite.Sprite):
     def __init__(self) -> None:
         super().__init__()
@@ -67,8 +69,8 @@ class Bubble(pygame.sprite.Sprite):
         self.killed = False
 
         self.image = self.images[self.state]
-        self.image = pygame.transform.scale(self.images[self.state],
-                                            (Settings.bubble_radius * 2, Settings.bubble_radius * 2))
+        self.image = pygame.transform.scale(
+            self.images[self.state], (Settings.bubble_radius * 2, Settings.bubble_radius * 2))
         self.rect = self.image.get_rect()
         self.radius = self.rect.width // 2
 
@@ -78,17 +80,29 @@ class Bubble(pygame.sprite.Sprite):
 
     @staticmethod
     def get_bubble_images() -> list[pygame.Surface]:
-        bubble_images = ['bubble1.png', 'bubble2.png', 'bubble3.png', 'bubble4.png', 'bubble5.png', 'bubble6.png',
-                         'bubble7.png']
-        bubble_images.sort()
-        return [pygame.image.load(Settings.create_image_path(img)) for img in bubble_images]
+        bubble_images = sorted(['bubble1.png',
+                                'bubble2.png',
+                                'bubble3.png',
+                                'bubble4.png',
+                                'bubble5.png',
+                                'bubble6.png',
+                                'bubble7.png'])
+        return [pygame.image.load(Settings.create_image_path(img))
+                for img in bubble_images]
 
     @staticmethod
     def generate_next_free_position(depth=0) -> tuple[int, int]:
         random_pos = (
-            random.randint(0, Settings.window_width - Settings.bubble_radius - 10),
-            random.randint(0, Settings.window_height - Settings.bubble_radius - 10)
-        )
+            random.randint(
+                0,
+                Settings.window_width -
+                Settings.bubble_radius -
+                10),
+            random.randint(
+                0,
+                Settings.window_height -
+                Settings.bubble_radius -
+                10))
 
         if not Bubble._check_if_pos_is_valid(random_pos) and depth <= 50:
             return Bubble.generate_next_free_position(depth=depth + 1)
@@ -97,7 +111,8 @@ class Bubble(pygame.sprite.Sprite):
 
     @staticmethod
     def _check_if_pos_is_valid(position):
-        bubbles = [(bubble.rect.center, bubble.rect.width) for bubble in game.bubbles.sprites()]
+        bubbles = [(bubble.rect.center, bubble.rect.width)
+                   for bubble in game.bubbles.sprites()]
 
         for b in bubbles:
             b_pos = b[0]
@@ -137,7 +152,7 @@ class Bubble(pygame.sprite.Sprite):
     def increase_size(self) -> None:
         center = self.rect.center
         self.image = pygame.transform.scale(self.images[self.state], (
-        self.rect.width + self.expansion_rate, self.rect.height + self.expansion_rate))
+            self.rect.width + self.expansion_rate, self.rect.height + self.expansion_rate))
         self.rect = self.image.get_rect()
         self.rect.center = center
         self.radius = self.rect.width // 2
@@ -150,7 +165,8 @@ class Bubble(pygame.sprite.Sprite):
 
     def check_bubble_collision(self):
         # TODO: Game Over
-        hits = pygame.sprite.spritecollide(self, game.bubbles, False, pygame.sprite.collide_circle)
+        hits = pygame.sprite.spritecollide(
+            self, game.bubbles, False, pygame.sprite.collide_circle)
 
         if len(hits) > 1:
             for hit in hits:
@@ -159,16 +175,20 @@ class Bubble(pygame.sprite.Sprite):
     def check_window_collision(self):
         # TODO: Game Over
         left_pos = self.rect.center[0] - self.rect.width // 2
-        if left_pos < 0: self.kill(looped_call=False)
+        if left_pos < 0:
+            self.kill(looped_call=False)
 
         right_pos = self.rect.center[0] + self.rect.width // 2
-        if right_pos > Settings.window_width: self.kill(looped_call=False)
+        if right_pos > Settings.window_width:
+            self.kill(looped_call=False)
 
         top_pos = self.rect.center[1] - self.rect.height // 2
-        if top_pos < 0: self.kill(looped_call=False)
+        if top_pos < 0:
+            self.kill(looped_call=False)
 
         bottom_pos = self.rect.center[1] + self.rect.height // 2
-        if bottom_pos > Settings.window_height: self.kill(looped_call=False)
+        if bottom_pos > Settings.window_height:
+            self.kill(looped_call=False)
 
     def check_collision(self):
         self.check_bubble_collision()
@@ -206,7 +226,8 @@ class Game:
         self.points = 0
 
         pygame.mixer.music.set_volume(Settings.volume)
-        self.sound_pop_bubble = pygame.mixer.Sound(Settings.create_sound_path('pop.mp3'))
+        self.sound_pop_bubble = pygame.mixer.Sound(
+            Settings.create_sound_path('pop.mp3'))
 
     def run(self) -> None:
         while self.running:
@@ -263,7 +284,8 @@ class Game:
             if bubble.is_hovered(pygame.mouse.get_pos()):
                 any_bubble_hovered = True
 
-            pygame.mouse.set_cursor(*pygame.cursors.broken_x if any_bubble_hovered else pygame.cursors.diamond)
+            pygame.mouse.set_cursor(
+                *pygame.cursors.broken_x if any_bubble_hovered else pygame.cursors.diamond)
 
     def draw(self) -> None:
         self.screen.fill((0, 0, 0))
@@ -284,8 +306,13 @@ class Game:
         pygame.display.flip()
 
     def draw_points(self) -> None:
-        font = pygame.font.SysFont(Settings.font_points[0], Settings.font_points[1])
-        points_text = font.render(Settings.title_points.replace('%s', str(self.points)), True, (255, 255, 255))
+        font = pygame.font.SysFont(
+            Settings.font_points[0],
+            Settings.font_points[1])
+        points_text = font.render(
+            Settings.title_points.replace(
+                '%s', str(
+                    self.points)), True, (255, 255, 255))
         points_text_rect = points_text.get_rect()
         points_text_rect.top = Settings.window_height - 50
         points_text_rect.left = 25
