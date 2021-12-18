@@ -4,6 +4,7 @@ import pygame
 import os
 import random
 
+
 class Settings:
     # Window settings
     window_height = 750
@@ -14,7 +15,7 @@ class Settings:
     @staticmethod
     def get_size() -> tuple[int, int]:
         return Settings.window_width, Settings.window_height
-    
+
     # Paths
     path_working_directory = os.path.dirname(os.path.abspath(__file__))
     path_assets = os.path.join(path_working_directory, 'assets')
@@ -24,11 +25,11 @@ class Settings:
     @staticmethod
     def create_image_path(image_name) -> str:
         return os.path.join(Settings.path_images, image_name)
-    
+
     @staticmethod
     def create_sound_path(sound_name) -> str:
         return os.path.join(Settings.path_sounds, sound_name)
-    
+
     # Bubble settings
     bubble_radius = 5
     bubble_speed = 20
@@ -53,7 +54,7 @@ class Background(pygame.sprite.Sprite):
 
         self.image = pygame.image.load(Settings.create_image_path(image_name))
         self.image = pygame.transform.scale(self.image, Settings.get_size())
-    
+
     def draw(self, screen):
         screen.blit(self.image, (0, 0))
 
@@ -62,11 +63,12 @@ class Bubble(pygame.sprite.Sprite):
         super().__init__()
 
         self.images = Bubble.get_bubble_images()
-        self.state = 0 # Current image
+        self.state = 0  # Current image
         self.killed = False
 
         self.image = self.images[self.state]
-        self.image = pygame.transform.scale(self.images[self.state], (Settings.bubble_radius * 2, Settings.bubble_radius * 2))
+        self.image = pygame.transform.scale(self.images[self.state],
+                                            (Settings.bubble_radius * 2, Settings.bubble_radius * 2))
         self.rect = self.image.get_rect()
         self.radius = self.rect.width // 2
 
@@ -76,10 +78,11 @@ class Bubble(pygame.sprite.Sprite):
 
     @staticmethod
     def get_bubble_images() -> list[pygame.Surface]:
-        bubble_images = ['bubble1.png', 'bubble2.png', 'bubble3.png', 'bubble4.png', 'bubble5.png', 'bubble6.png', 'bubble7.png']
+        bubble_images = ['bubble1.png', 'bubble2.png', 'bubble3.png', 'bubble4.png', 'bubble5.png', 'bubble6.png',
+                         'bubble7.png']
         bubble_images.sort()
         return [pygame.image.load(Settings.create_image_path(img)) for img in bubble_images]
-    
+
     @staticmethod
     def generate_next_free_position(depth=0) -> tuple[int, int]:
         random_pos = (
@@ -89,10 +92,10 @@ class Bubble(pygame.sprite.Sprite):
 
         if not Bubble._check_if_pos_is_valid(random_pos) and depth <= 50:
             return Bubble.generate_next_free_position(depth=depth + 1)
-        
+
         return random_pos
-    
-    @staticmethod 
+
+    @staticmethod
     def _check_if_pos_is_valid(position):
         bubbles = [(bubble.rect.center, bubble.rect.width) for bubble in game.bubbles.sprites()]
 
@@ -106,7 +109,7 @@ class Bubble(pygame.sprite.Sprite):
                 return False
 
         return True
-    
+
     def kill(self, looped_call=True) -> None:
         self.killed = True
 
@@ -128,13 +131,13 @@ class Bubble(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = old_center
 
-
         if self.state > len(self.images) - 2:
-            super().kill() # Kill after animation is done
+            super().kill()  # Kill after animation is done
 
     def increase_size(self) -> None:
         center = self.rect.center
-        self.image = pygame.transform.scale(self.images[self.state], (self.rect.width + self.expansion_rate, self.rect.height + self.expansion_rate))
+        self.image = pygame.transform.scale(self.images[self.state], (
+        self.rect.width + self.expansion_rate, self.rect.height + self.expansion_rate))
         self.rect = self.image.get_rect()
         self.rect.center = center
         self.radius = self.rect.width // 2
@@ -144,15 +147,14 @@ class Bubble(pygame.sprite.Sprite):
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
-    
+
     def check_bubble_collision(self):
         # TODO: Game Over
         hits = pygame.sprite.spritecollide(self, game.bubbles, False, pygame.sprite.collide_circle)
-        
+
         if len(hits) > 1:
             for hit in hits:
                 hit.kill(looped_call=False)
-
 
     def check_window_collision(self):
         # TODO: Game Over
@@ -171,13 +173,14 @@ class Bubble(pygame.sprite.Sprite):
     def check_collision(self):
         self.check_bubble_collision()
         self.check_window_collision()
-    
+
     def update(self):
         if self.killed:
             self.kill()
-            return  
+            return
 
-        self.check_collision()          
+        self.check_collision()
+
 
 class Game:
     def __init__(self) -> None:
@@ -202,7 +205,7 @@ class Game:
         self.pause = False
         self.points = 0
 
-        pygame.mixer.music.set_volume(Settings.volume) 
+        pygame.mixer.music.set_volume(Settings.volume)
         self.sound_pop_bubble = pygame.mixer.Sound(Settings.create_sound_path('pop.mp3'))
 
     def run(self) -> None:
@@ -227,7 +230,7 @@ class Game:
             for bubble in self.bubbles:
                 if bubble.is_hovered(event.pos):
                     bubble.kill(looped_call=False)
-                    self.points += bubble.rect.width // 2 # Points depending on bubble size
+                    self.points += bubble.rect.width // 2  # Points depending on bubble size
                     break
 
     def handle_events(self) -> None:
@@ -235,7 +238,7 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
-                self.handle_keydown_events(event)    
+                self.handle_keydown_events(event)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 self.handle_mouse_events(event)
 
@@ -271,15 +274,15 @@ class Game:
         self.draw_points()
 
         pygame.display.flip()
-    
+
     def draw_pause(self) -> None:
         self.screen.fill((0, 0, 0))
         pygame.display.flip()
-    
+
     def draw_gameover(self) -> None:
         self.screen.fill((0, 0, 0))
         pygame.display.flip()
-    
+
     def draw_points(self) -> None:
         font = pygame.font.SysFont(Settings.font_points[0], Settings.font_points[1])
         points_text = font.render(Settings.title_points.replace('%s', str(self.points)), True, (255, 255, 255))
@@ -288,6 +291,7 @@ class Game:
         points_text_rect.left = 25
 
         self.screen.blit(points_text, points_text_rect)
+
 
 if __name__ == '__main__':
     game = Game()
