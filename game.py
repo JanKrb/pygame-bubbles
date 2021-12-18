@@ -83,6 +83,43 @@ class Background(pygame.sprite.Sprite):
         Update sprite every [fps] frames
         """
 
+class Cursor(pygame.sprite.Sprite):
+    def __init__(self) -> None:
+        super().__init__()
+
+        self.cursors = [
+            pygame.image.load(Settings.create_image_path('cursor1.png')),
+            pygame.image.load(Settings.create_image_path('cursor2.png'))
+        ]
+
+        self.image = self.cursors[0]
+        self.image = pygame.transform.scale(self.image, (30, 30))
+        self.rect = self.image.get_rect()
+
+    def select_cursor(self, cursor_number):
+        """
+        Select cursor from index
+        """
+
+        old_rect = self.rect
+        self.image = self.cursors[cursor_number]
+        self.image = pygame.transform.scale(self.image, (30, 30))
+        self.rect = old_rect
+
+    def draw(self, screen):
+        """
+        Draw sprite on screen at position 0/0
+        """
+
+        screen.blit(self.image, self.rect)
+
+    def update(self, pos):
+        """
+        Update cursor position
+        """
+
+        self.rect.topleft = pos
+
 class Bubble(pygame.sprite.Sprite):
     def __init__(self) -> None:
         super().__init__()
@@ -280,6 +317,7 @@ class Game:
         self.screen = pygame.display.set_mode(Settings.get_size())
         self.clock = pygame.time.Clock()
         self.running = True
+        self.cursor = Cursor()
 
         self.bubble_speed = Settings.bubble_speed
 
@@ -292,7 +330,8 @@ class Game:
         self.game_over = False
         self.pause = False
         self.points = 0
-
+        
+        pygame.mouse.set_visible(False)
         pygame.mixer.music.set_volume(Settings.volume)
         self.sound_pop_bubble = pygame.mixer.Sound(
             Settings.create_sound_path('pop.mp3'))
@@ -361,6 +400,8 @@ class Game:
         Update loop every [fps] frames
         """
 
+        self.cursor.update(pygame.mouse.get_pos())
+
         self.respawn_bubbles()
 
         self.bubbles.update()
@@ -377,8 +418,8 @@ class Game:
             if bubble.is_hovered(pygame.mouse.get_pos()):
                 any_bubble_hovered = True
 
-            pygame.mouse.set_cursor(
-                *pygame.cursors.broken_x if any_bubble_hovered else pygame.cursors.diamond)
+            self.cursor.select_cursor(
+                1 if any_bubble_hovered else 0)
 
     def draw(self) -> None:
         """
@@ -391,6 +432,7 @@ class Game:
         self.bubbles.draw(self.screen)
 
         self.draw_points()
+        self.cursor.draw(self.screen)
 
         pygame.display.flip()
 
@@ -400,6 +442,7 @@ class Game:
         """
 
         self.screen.fill((0, 0, 0))
+        self.cursor.draw(self.screen)
         pygame.display.flip()
 
     def draw_gameover(self) -> None:
@@ -408,6 +451,7 @@ class Game:
         """
 
         self.screen.fill((0, 0, 0))
+        self.cursor.draw(self.screen)
         pygame.display.flip()
 
     def draw_points(self) -> None:

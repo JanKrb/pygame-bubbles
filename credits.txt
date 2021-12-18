@@ -1,4 +1,5 @@
 Background: https://pixabay.com/illustrations/game-background-sky-game-landscape-4956017/
 Bubble: https://www.gamedeveloperstudio.com/graphics/viewgraphic.php?page-name=Bubble-popping-animation&item=1u5l0o9z5m3s6b612j
+Cursor: https://assetstore.unity.com/packages/2d/textures-materials/basic-rpg-cursors-139404
 
 Pop Bubble Sound: https://www.youtube.com/watch?v=FCDeiBFju6M
