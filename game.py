@@ -68,6 +68,7 @@ class Bubble(pygame.sprite.Sprite):
         self.image = self.images[self.state]
         self.image = pygame.transform.scale(self.images[self.state], (Settings.bubble_radius * 2, Settings.bubble_radius * 2))
         self.rect = self.image.get_rect()
+        self.radius = self.rect.width // 2
 
         self.expansion_rate = random.randint(*game.bubble_spawn_speed)
 
@@ -136,6 +137,7 @@ class Bubble(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.images[self.state], (self.rect.width + self.expansion_rate, self.rect.height + self.expansion_rate))
         self.rect = self.image.get_rect()
         self.rect.center = center
+        self.radius = self.rect.width // 2
 
     def is_hovered(self, mouse_pos) -> bool:
         return self.rect.collidepoint(mouse_pos)
@@ -144,7 +146,13 @@ class Bubble(pygame.sprite.Sprite):
         screen.blit(self.image, self.rect)
     
     def check_bubble_collision(self):
-        pass
+        # TODO: Game Over
+        hits = pygame.sprite.spritecollide(self, game.bubbles, False, pygame.sprite.collide_circle)
+        
+        if len(hits) > 1:
+            for hit in hits:
+                hit.kill(looped_call=False)
+
 
     def check_window_collision(self):
         # TODO: Game Over
