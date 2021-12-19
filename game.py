@@ -345,13 +345,12 @@ class Game:
             self.clock.tick(Settings.window_fps)
             self.handle_events()
 
+            self.draw()
+            self.cursor.update(pygame.mouse.get_pos())
+            pygame.mixer.pause() if self.pause else pygame.mixer.unpause()
+
             if not self.pause and not self.game_over:
                 self.update()
-                self.draw()
-            elif self.pause:
-                self.draw_pause()
-            elif self.game_over:
-                self.draw_game_over()
 
     def handle_keydown_events(self, event) -> None:
         """
@@ -360,6 +359,8 @@ class Game:
 
         if event.key == pygame.K_ESCAPE:
             self.running = False
+        elif event.key == pygame.K_p:
+            self.pause = not self.pause
 
     def handle_mouse_events(self, event) -> None:
         """
@@ -400,8 +401,6 @@ class Game:
         Update loop every [fps] frames
         """
 
-        self.cursor.update(pygame.mouse.get_pos())
-
         self.respawn_bubbles()
 
         self.bubbles.update()
@@ -432,6 +431,12 @@ class Game:
         self.bubbles.draw(self.screen)
 
         self.draw_points()
+
+        if self.pause:
+            self.draw_pause()
+        if self.game_over:
+            self.draw_gameover()
+
         self.cursor.draw(self.screen)
 
         pygame.display.flip()
@@ -441,18 +446,26 @@ class Game:
         Draw the pause screen
         """
 
-        self.screen.fill((0, 0, 0))
-        self.cursor.draw(self.screen)
-        pygame.display.flip()
+        overlay = pygame.Surface(self.screen.get_size())
+        overlay.set_alpha(180)
+        overlay.fill((0, 0, 0))
+        self.screen.blit(overlay, (0, 0))
+            
+        font = pygame.font.SysFont(
+            Settings.font_pause[0],
+            Settings.font_pause[1])
+        pause_text = font.render(
+            'PAUSE', True, (255, 255, 255))
+        pause_text_rect = pause_text.get_rect()
+        pause_text_rect.center = (
+            Settings.window_width // 2, Settings.window_height // 2)
+
+        self.screen.blit(pause_text, pause_text_rect)
 
     def draw_gameover(self) -> None:
         """
         Draw the game over screen
         """
-
-        self.screen.fill((0, 0, 0))
-        self.cursor.draw(self.screen)
-        pygame.display.flip()
 
     def draw_points(self) -> None:
         """
