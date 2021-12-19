@@ -330,7 +330,7 @@ class Game:
         self.game_over = False
         self.pause = False
         self.points = 0
-        
+
         pygame.mouse.set_visible(False)
         pygame.mixer.music.set_volume(Settings.volume)
         self.sound_pop_bubble = pygame.mixer.Sound(
@@ -347,7 +347,11 @@ class Game:
 
             self.draw()
             self.cursor.update(pygame.mouse.get_pos())
-            pygame.mixer.pause() if self.pause else pygame.mixer.unpause()
+
+            if self.pause:
+                pygame.mixer.pause()
+            else:
+                pygame.mixer.unpause()
 
             if not self.pause and not self.game_over:
                 self.update()
@@ -450,7 +454,7 @@ class Game:
         overlay.set_alpha(180)
         overlay.fill((0, 0, 0))
         self.screen.blit(overlay, (0, 0))
-            
+
         font = pygame.font.SysFont(
             Settings.font_pause[0],
             Settings.font_pause[1])
