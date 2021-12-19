@@ -144,6 +144,8 @@ class Bubble(pygame.sprite.Sprite):
 
         self.rect.center = Bubble.generate_next_free_position()
 
+        pygame.mixer.Sound.play(game.sound_spawn_bubble)
+
     @staticmethod
     def get_bubble_images() -> list[pygame.Surface]:
         """
@@ -338,6 +340,8 @@ class Game:
         pygame.mixer.music.set_volume(Settings.volume)
         self.sound_pop_bubble = pygame.mixer.Sound(
             Settings.create_sound_path('pop.mp3'))
+        self.sound_spawn_bubble = pygame.mixer.Sound(
+            Settings.create_sound_path('spawn.mp3'))
 
         # Game Over Button (Precreated to use collision in events)
         self.restart_surface = pygame.Surface((200, 50))
