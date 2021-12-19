@@ -522,7 +522,7 @@ class Game:
         highscore_text = font.render(
             Settings.title_highscore.replace(
                 '%s', str(
-                    self.get_highscore())), True, (255, 255, 255))
+                    Game.get_highscore())), True, (255, 255, 255))
         highscore_text_rect = highscore_text.get_rect()
         highscore_text_rect.center = (
             Settings.window_width // 2, Settings.window_height // 2 + 100)
@@ -560,22 +560,24 @@ class Game:
         self.game_over = False
         self.pause = False
 
-    def get_highscore(self) -> int:
+    @staticmethod
+    def get_highscore() -> int:
         """
         Getting highscore from file
         """
 
-        with open(Settings.path_highscore, 'r') as file:
+        with open(Settings.path_highscore, 'r', encoding='utf8') as file:
             highscore = int(file.read())
 
         return highscore
 
-    def set_highscore(self, highscore: int) -> None:
+    @staticmethod
+    def set_highscore(highscore: int) -> None:
         """
         Setting highscore to file
         """
 
-        with open(Settings.path_highscore, 'w') as file:
+        with open(Settings.path_highscore, 'w', encoding='utf8') as file:
             file.write(str(highscore))
 
     def save_highscore(self) -> None:
@@ -583,8 +585,8 @@ class Game:
         Saving highscore to file
         """
 
-        if self.points > self.get_highscore():
-            self.set_highscore(self.points)
+        if self.points > Game.get_highscore():
+            Game.set_highscore(self.points)
 
     def draw_points(self) -> None:
         """
