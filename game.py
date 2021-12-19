@@ -417,7 +417,6 @@ class Game:
         """
         Respawning bubbles
         """
-        print(self.bubble_delay)
 
         if len(self.bubbles.sprites()) <= self.bubbles_limit:
             if self.bubble_delay <= 0:
@@ -425,6 +424,13 @@ class Game:
                 self.bubble_delay = self.bubble_delay_initial
             else:
                 self.bubble_delay -= 1
+        
+    def decrease_delay(self) -> None:
+        """
+        Decreasing delay between bubbles spawning
+        """
+
+        self.bubble_delay_initial = Settings.bubble_delay - max(self.points // 100, 5)
 
     def update(self) -> None:
         """
@@ -432,6 +438,7 @@ class Game:
         """
 
         self.respawn_bubbles()
+        self.decrease_delay()
 
         self.bubbles.update()
 
