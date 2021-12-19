@@ -171,12 +171,12 @@ class Bubble(pygame.sprite.Sprite):
 
         random_pos = (
             random.randint(
-                0,
+                10 + Settings.bubble_radius,
                 Settings.window_width -
                 Settings.bubble_radius -
                 10),
             random.randint(
-                0,
+                10 + Settings.bubble_radius,
                 Settings.window_height -
                 Settings.bubble_radius -
                 10))
