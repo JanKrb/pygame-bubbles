@@ -31,6 +31,7 @@ class Settings:
     path_assets = os.path.join(path_working_directory, 'assets')
     path_images = os.path.join(path_assets, 'images')
     path_sounds = os.path.join(path_assets, 'sounds')
+    path_highscore = os.path.join(path_working_directory, 'highscore.txt')
 
     @staticmethod
     def create_image_path(image_name) -> str:
@@ -356,6 +357,7 @@ class Game:
 
             self.draw()
             self.cursor.update(pygame.mouse.get_pos())
+            self.save_highscore()
 
             if self.pause:
                 pygame.mixer.pause()
@@ -520,7 +522,7 @@ class Game:
         highscore_text = font.render(
             Settings.title_highscore.replace(
                 '%s', str(
-                    self.points)), True, (255, 255, 255))
+                    self.get_highscore())), True, (255, 255, 255))
         highscore_text_rect = highscore_text.get_rect()
         highscore_text_rect.center = (
             Settings.window_width // 2, Settings.window_height // 2 + 100)
@@ -557,6 +559,32 @@ class Game:
         self.bubble_speed = Settings.bubble_speed
         self.game_over = False
         self.pause = False
+
+    def get_highscore(self) -> int:
+        """
+        Getting highscore from file
+        """
+
+        with open(Settings.path_highscore, 'r') as file:
+            highscore = int(file.read())
+
+        return highscore
+
+    def set_highscore(self, highscore: int) -> None:
+        """
+        Setting highscore to file
+        """
+
+        with open(Settings.path_highscore, 'w') as file:
+            file.write(str(highscore))
+
+    def save_highscore(self) -> None:
+        """
+        Saving highscore to file
+        """
+
+        if self.points > self.get_highscore():
+            self.set_highscore(self.points)
 
     def draw_points(self) -> None:
         """
