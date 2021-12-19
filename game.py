@@ -59,10 +59,15 @@ class Settings:
 
     # Fonts
     font_pause = ('arialblack', 64)
+    font_gameover = ('arialblack', 64)
+    font_score = ('arialblack', 48)
+    font_highscore = ('arialblack', 48)
+    font_restart = ('arialblack', 32)
     font_points = ('arialblack', 28)
 
     # Strings
     title_points = "Points: %s"
+    title_highscore = "Highscore: %s"
 
 
 class Background(pygame.sprite.Sprite):
@@ -255,37 +260,34 @@ class Bubble(pygame.sprite.Sprite):
     def check_bubble_collision(self):
         """
         Check if sprite collides with another sprite/bubble
-        TODO: Implement game over
         """
 
         hits = pygame.sprite.spritecollide(
             self, game.bubbles, False, pygame.sprite.collide_circle)
 
         if len(hits) > 1:
-            for hit in hits:
-                hit.kill(looped_call=False)
+            game.game_over = True
 
     def check_window_collision(self):
         """
         Check if sprite collides with edge
-        TODO: Implement game over
         """
 
         left_pos = self.rect.center[0] - self.rect.width // 2
         if left_pos < 0:
-            self.kill(looped_call=False)
+            game.game_over = True
 
         right_pos = self.rect.center[0] + self.rect.width // 2
         if right_pos > Settings.window_width:
-            self.kill(looped_call=False)
+            game.game_over = True
 
         top_pos = self.rect.center[1] - self.rect.height // 2
         if top_pos < 0:
-            self.kill(looped_call=False)
+            game.game_over = True
 
         bottom_pos = self.rect.center[1] + self.rect.height // 2
         if bottom_pos > Settings.window_height:
-            self.kill(looped_call=False)
+            game.game_over = True
 
     def check_collision(self):
         """
@@ -336,6 +338,13 @@ class Game:
         self.sound_pop_bubble = pygame.mixer.Sound(
             Settings.create_sound_path('pop.mp3'))
 
+        # Game Over Button (Precreated to use collision in events)
+        self.restart_surface = pygame.Surface((200, 50))
+        self.restart_surface.fill((255, 255, 255))
+        self.restart_surface_rect = self.restart_surface.get_rect()
+        self.restart_surface_rect.center = (
+            Settings.window_width // 2, Settings.window_height // 2 + 250)
+
     def run(self) -> None:
         """
         Main loop
@@ -372,6 +381,10 @@ class Game:
         """
 
         if event.button == 1:
+            if self.game_over:
+                self.click_restart_btn_handler(event.pos)
+                return
+
             for bubble in self.bubbles:
                 if bubble.is_hovered(event.pos):
                     bubble.kill(looped_call=False)
@@ -470,6 +483,80 @@ class Game:
         """
         Draw the game over screen
         """
+
+        overlay = pygame.Surface(self.screen.get_size())
+        overlay.set_alpha(180)
+        overlay.fill((0, 0, 0))
+        self.screen.blit(overlay, (0, 0))
+
+        font = pygame.font.SysFont(
+            Settings.font_gameover[0],
+            Settings.font_gameover[1])
+        gameover_text = font.render(
+            'GAME OVER', True, (255, 255, 255))
+        gameover_text_rect = gameover_text.get_rect()
+        gameover_text_rect.center = (
+            Settings.window_width // 2, Settings.window_height // 2 - 20)
+
+        self.screen.blit(gameover_text, gameover_text_rect)
+
+        font = pygame.font.SysFont(
+            Settings.font_score[0],
+            Settings.font_score[1])
+        points_text = font.render(
+            Settings.title_points.replace(
+                '%s', str(
+                    self.points)), True, (255, 255, 255))
+        points_text_rect = points_text.get_rect()
+        points_text_rect.center = (
+            Settings.window_width // 2, Settings.window_height // 2 + 50)
+
+        self.screen.blit(points_text, points_text_rect)
+
+        # TODO: Add highscore
+        font = pygame.font.SysFont(
+            Settings.font_highscore[0],
+            Settings.font_highscore[1])
+        highscore_text = font.render(
+            Settings.title_highscore.replace(
+                '%s', str(
+                    self.points)), True, (255, 255, 255))
+        highscore_text_rect = highscore_text.get_rect()
+        highscore_text_rect.center = (
+            Settings.window_width // 2, Settings.window_height // 2 + 100)
+
+        self.screen.blit(highscore_text, highscore_text_rect)
+
+        font = pygame.font.SysFont(
+            Settings.font_restart[0],
+            Settings.font_restart[1])
+        restart_text = font.render(
+            "RESTART", True, (0, 0, 0))
+        restart_text_rect = restart_text.get_rect()
+        restart_text_rect.center = (
+            Settings.window_width // 2, Settings.window_height // 2 + 250)
+
+        self.screen.blit(self.restart_surface, self.restart_surface_rect)
+        self.screen.blit(restart_text, restart_text_rect)
+
+    def click_restart_btn_handler(self, mouse_position) -> None:
+        """
+        Click handler for restart button in game over screen
+        """
+
+        if self.restart_surface_rect.collidepoint(mouse_position):
+            self.reset()
+
+    def reset(self) -> None:
+        """
+        Resetting the game
+        """
+
+        self.points = 0
+        self.bubbles.empty()
+        self.bubble_speed = Settings.bubble_speed
+        self.game_over = False
+        self.pause = False
 
     def draw_points(self) -> None:
         """
