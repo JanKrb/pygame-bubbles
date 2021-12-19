@@ -388,6 +388,8 @@ class Game:
         """
         Event handler for mouse events
         """
+        if self.pause:
+            return
 
         if event.button == 1:
             if self.game_over:
