@@ -270,6 +270,7 @@ class Bubble(pygame.sprite.Sprite):
             self, game.bubbles, False, pygame.sprite.collide_circle)
 
         if len(hits) > 1:
+            pygame.mixer.Sound.play(game.sound_collision_bubble)
             game.gameover()
 
     def check_window_collision(self):
@@ -345,6 +346,8 @@ class Game:
             Settings.create_sound_path('pop.mp3'))
         self.sound_spawn_bubble = pygame.mixer.Sound(
             Settings.create_sound_path('spawn.mp3'))
+        self.sound_collision_bubble = pygame.mixer.Sound(
+            Settings.create_sound_path('collision.mp3'))
 
         # Game Over Button (Precreated to use collision in events)
         self.restart_surface = pygame.Surface((200, 50))
@@ -428,7 +431,7 @@ class Game:
                 self.bubble_delay = self.bubble_delay_initial
             else:
                 self.bubble_delay -= 1
-        
+
     def decrease_delay(self) -> None:
         """
         Decreasing delay between bubbles spawning

@@ -4,3 +4,4 @@ Cursor: https://assetstore.unity.com/packages/2d/textures-materials/basic-rpg-cu
 
 Pop Bubble Sound: https://www.youtube.com/watch?v=FCDeiBFju6M
 Spawn Bubble Sound: https://www.zapsplat.com/music/cartoon-bubble-watery-movement-3/
+Collision Bubble Sound: https://www.soundsnap.com/sound_design_wet_digital_distorted_hit_1_wav
