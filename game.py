@@ -388,6 +388,9 @@ class Game:
         """
         Event handler for mouse events
         """
+        if event.button == 3:
+            self.pause = not self.pause
+
         if self.pause:
             return
 
