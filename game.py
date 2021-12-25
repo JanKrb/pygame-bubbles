@@ -379,7 +379,7 @@ class Game:
         """
 
         if event.key == pygame.K_ESCAPE:
-            self.running = False
+            self.stop_game()
         elif event.key == pygame.K_p:
             self.pause = not self.pause
 
@@ -411,7 +411,7 @@ class Game:
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self.running = False
+                self.stop_game()
             elif event.type == pygame.KEYDOWN:
                 self.handle_keydown_events(event)
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -610,6 +610,15 @@ class Game:
         if self.points > Game.get_highscore():
             Game.set_highscore(self.points)
 
+    def stop_game(self) -> None:
+        """
+        Stop the game
+        """
+
+        if not self.pause:
+            self.save_highscore()
+
+        self.running = False
 
     def gameover(self) -> None:
         """
