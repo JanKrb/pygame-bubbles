@@ -14,8 +14,8 @@ import pygame
 
 class Settings:
     # Window settings
-    window_height = 750
-    window_width = 1200
+    window_height = 550
+    window_width = 1050
     window_fps = 60
     window_caption = "Bubbles"
 
@@ -354,7 +354,7 @@ class Game:
         self.restart_surface.fill((255, 255, 255))
         self.restart_surface_rect = self.restart_surface.get_rect()
         self.restart_surface_rect.center = (
-            Settings.window_width // 2, Settings.window_height // 2 + 250)
+            Settings.window_width // 2, Settings.window_height // 2 + 175)
 
     def run(self) -> None:
         """
@@ -560,7 +560,7 @@ class Game:
             "RESTART", True, (0, 0, 0))
         restart_text_rect = restart_text.get_rect()
         restart_text_rect.center = (
-            Settings.window_width // 2, Settings.window_height // 2 + 250)
+            Settings.window_width // 2, Settings.window_height // 2 + 175)
 
         self.screen.blit(self.restart_surface, self.restart_surface_rect)
         self.screen.blit(restart_text, restart_text_rect)
