@@ -270,7 +270,7 @@ class Bubble(pygame.sprite.Sprite):
             self, game.bubbles, False, pygame.sprite.collide_circle)
 
         if len(hits) > 1:
-            game.game_over = True
+            game.gameover()
 
     def check_window_collision(self):
         """
@@ -279,19 +279,19 @@ class Bubble(pygame.sprite.Sprite):
 
         left_pos = self.rect.center[0] - self.rect.width // 2
         if left_pos < 0:
-            game.game_over = True
+            game.gameover()
 
         right_pos = self.rect.center[0] + self.rect.width // 2
         if right_pos > Settings.window_width:
-            game.game_over = True
+            game.gameover()
 
         top_pos = self.rect.center[1] - self.rect.height // 2
         if top_pos < 0:
-            game.game_over = True
+            game.gameover()
 
         bottom_pos = self.rect.center[1] + self.rect.height // 2
         if bottom_pos > Settings.window_height:
-            game.game_over = True
+            game.gameover()
 
     def check_collision(self):
         """
@@ -364,7 +364,6 @@ class Game:
 
             self.draw()
             self.cursor.update(pygame.mouse.get_pos())
-            self.save_highscore()
 
             if self.pause:
                 pygame.mixer.pause()
@@ -538,7 +537,6 @@ class Game:
 
         self.screen.blit(points_text, points_text_rect)
 
-        # TODO: Add highscore
         font = pygame.font.SysFont(
             Settings.font_highscore[0],
             Settings.font_highscore[1])
@@ -611,6 +609,15 @@ class Game:
 
         if self.points > Game.get_highscore():
             Game.set_highscore(self.points)
+
+
+    def gameover(self) -> None:
+        """
+        Init game over screen
+        """
+
+        self.save_highscore()
+        self.game_over = True
 
     def draw_points(self) -> None:
         """
