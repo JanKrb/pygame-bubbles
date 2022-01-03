@@ -6,6 +6,7 @@
 # pylint: disable=R0902
 # pylint: disable=W0511
 # pylint: disable=E1136
+# pylint: disable=R0903
 
 import os
 import random
@@ -50,7 +51,7 @@ class Settings:
     # Bubble settings
     bubble_radius = 5
     bubble_speed = 20
-    bubble_delay = 80
+    bubble_delay = 1000 # in ms
     bubble_spawn_margin = 10
     bubble_spawn_speed_initial = (1, 4)
     bubble_animation_speed = 1
@@ -71,6 +72,22 @@ class Settings:
     title_points = "Points: %s"
     title_highscore = "Highscore: %s"
 
+class Timer:
+    def __init__(self, duration, with_start=False) -> None:
+        self.duration = duration
+        self.next = pygame.time.get_ticks()
+
+        if not with_start:
+            self.next += self.duration
+
+    def is_next_stop_reached(self) -> bool:
+        """
+        Return flag and reset timer when next iteration is reached
+        """
+        if pygame.time.get_ticks() >= self.next:
+            self.next = pygame.time.get_ticks() + self.duration
+            return True
+        return False
 
 class Background(pygame.sprite.Sprite):
     def __init__(self, image_name='background.jpg') -> None:
@@ -327,8 +344,7 @@ class Game:
         self.cursor = Cursor()
 
         self.bubble_speed = Settings.bubble_speed
-        self.bubble_delay_initial = Settings.bubble_delay
-        self.bubble_delay = self.bubble_delay_initial
+        self.bubble_delay_timer = Timer(Settings.bubble_delay)
 
         self.background = Background()
         self.bubbles = pygame.sprite.Group()
@@ -426,18 +442,15 @@ class Game:
         """
 
         if len(self.bubbles.sprites()) <= self.bubbles_limit:
-            if self.bubble_delay <= 0:
+            if self.bubble_delay_timer.is_next_stop_reached():
                 self.bubbles.add(Bubble())
-                self.bubble_delay = self.bubble_delay_initial
-            else:
-                self.bubble_delay -= 1
 
     def decrease_delay(self) -> None:
         """
         Decreasing delay between bubbles spawning
         """
 
-        self.bubble_delay_initial = Settings.bubble_delay - max(self.points // 100, 5)
+        self.bubble_delay_timer.duration = Settings.bubble_delay - max(self.points // 250, 5)
 
     def update(self) -> None:
         """
@@ -581,7 +594,7 @@ class Game:
         self.points = 0
         self.bubbles.empty()
         self.bubble_speed = Settings.bubble_speed
-        self.bubble_delay = Settings.bubble_delay
+        self.bubble_delay_timer.duration = Settings.bubble_delay
         self.game_over = False
         self.pause = False
 
