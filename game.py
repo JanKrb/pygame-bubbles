@@ -50,7 +50,6 @@ class Settings:
 
     # Bubble settings
     bubble_radius = 5
-    bubble_speed = 20
     bubble_delay = 1000 # in ms
     bubble_spawn_margin = 10
     bubble_spawn_speed_initial = (1, 4)
@@ -343,8 +342,8 @@ class Game:
         self.running = True
         self.cursor = Cursor()
 
-        self.bubble_speed = Settings.bubble_speed
         self.bubble_delay_timer = Timer(Settings.bubble_delay)
+        self.bubble_size_timer = Timer(Settings.bubble_delay)
 
         self.background = Background()
         self.bubbles = pygame.sprite.Group()
@@ -462,10 +461,7 @@ class Game:
 
         self.bubbles.update()
 
-        self.bubble_speed -= 1
-
-        if self.bubble_speed <= 0:
-            self.bubble_speed = Settings.bubble_speed
+        if self.bubble_size_timer.is_next_stop_reached():
             for bubble in self.bubbles.sprites():
                 bubble.increase_size()
 
@@ -593,7 +589,7 @@ class Game:
 
         self.points = 0
         self.bubbles.empty()
-        self.bubble_speed = Settings.bubble_speed
+        self.bubble_size_timer.duration = Settings.bubble_speed
         self.bubble_delay_timer.duration = Settings.bubble_delay
         self.game_over = False
         self.pause = False
