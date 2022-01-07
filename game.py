@@ -215,9 +215,9 @@ class Bubble(pygame.sprite.Sprite):
             bubble_pos = bubble[0]
             dist_x = abs(bubble_pos[0] - position[0])
             dist_y = abs(bubble_pos[1] - position[1])
-            dist = sqrt(dist_x ** 2 + dist_y ** 2)
+            dist = sqrt(dist_x ** 2 + dist_y ** 2) - Settings.bubble_radius - (bubble[1] // 2)
 
-            if dist <= bubble[1] // 2 + 10:
+            if dist <= bubble[1] + 10:
                 return False
 
         return True
