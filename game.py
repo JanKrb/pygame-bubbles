@@ -651,7 +651,7 @@ class Game:
 
         self.points = 0
         self.bubbles.empty()
-        self.bubble_size_timer.duration = Settings.bubble_speed
+        self.bubble_size_timer.duration = Settings.bubble_delay
         self.bubble_delay_timer.duration = Settings.bubble_delay
         self.game_over = False
         self.pause = False
