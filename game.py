@@ -353,6 +353,7 @@ class Game:
 
         self.game_over = False
         self.pause = False
+        self.end = False
         self.points = 0
 
         pygame.mouse.set_visible(False)
@@ -397,7 +398,9 @@ class Game:
         """
 
         if event.key == pygame.K_ESCAPE:
-            self.stop_game()
+            if self.end:
+                self.stop_game()
+            self.end = True
         elif event.key == pygame.K_p:
             self.pause = not self.pause
 
@@ -412,7 +415,7 @@ class Game:
             return
 
         if event.button == 1:
-            if self.game_over:
+            if self.game_over or self.end:
                 self.click_restart_btn_handler(event.pos)
                 return
 
@@ -489,6 +492,8 @@ class Game:
             self.draw_pause()
         if self.game_over:
             self.draw_gameover()
+        if self.end:
+            self.draw_end()
 
         self.cursor.draw(self.screen)
 
@@ -573,6 +578,63 @@ class Game:
 
         self.screen.blit(self.restart_surface, self.restart_surface_rect)
         self.screen.blit(restart_text, restart_text_rect)
+
+    def draw_end(self) -> None:
+        """
+        Draw the game over screen
+        """
+
+        overlay = pygame.Surface(self.screen.get_size())
+        overlay.set_alpha(180)
+        overlay.fill((0, 0, 0))
+        self.screen.blit(overlay, (0, 0))
+
+        font = pygame.font.SysFont(
+            Settings.font_gameover[0],
+            Settings.font_gameover[1])
+        end_text = font.render(
+            'END', True, (255, 255, 255))
+        end_text_rect = end_text.get_rect()
+        end_text_rect.center = (
+            Settings.window_width // 2, Settings.window_height // 2 - 20)
+
+        self.screen.blit(end_text, end_text_rect)
+
+        font = pygame.font.SysFont(
+            Settings.font_score[0],
+            Settings.font_score[1])
+        points_text = font.render(
+            Settings.title_points.replace(
+                '%s', str(
+                    self.points)), True, (255, 255, 255))
+        points_text_rect = points_text.get_rect()
+        points_text_rect.center = (
+            Settings.window_width // 2, Settings.window_height // 2 + 50)
+
+        self.screen.blit(points_text, points_text_rect)
+
+        font = pygame.font.SysFont(
+            Settings.font_highscore[0],
+            Settings.font_highscore[1])
+        highscore_text = font.render("PRESS ESC TO QUIT", True, (255, 255, 255))
+        highscore_text_rect = highscore_text.get_rect()
+        highscore_text_rect.center = (
+            Settings.window_width // 2, Settings.window_height // 2 + 100)
+
+        self.screen.blit(highscore_text, highscore_text_rect)
+
+        font = pygame.font.SysFont(
+            Settings.font_restart[0],
+            Settings.font_restart[1])
+        restart_text = font.render(
+            "RESTART", True, (0, 0, 0))
+        restart_text_rect = restart_text.get_rect()
+        restart_text_rect.center = (
+            Settings.window_width // 2, Settings.window_height // 2 + 175)
+
+        self.screen.blit(self.restart_surface, self.restart_surface_rect)
+        self.screen.blit(restart_text, restart_text_rect)
+
 
     def click_restart_btn_handler(self, mouse_position) -> None:
         """
