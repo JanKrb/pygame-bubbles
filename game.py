@@ -389,7 +389,7 @@ class Game:
             else:
                 pygame.mixer.unpause()
 
-            if not self.pause and not self.game_over:
+            if not self.pause and not self.game_over and not self.end:
                 self.update()
 
     def handle_keydown_events(self, event) -> None:
